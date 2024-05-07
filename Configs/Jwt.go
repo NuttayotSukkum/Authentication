@@ -10,7 +10,7 @@ import (
 
 var hmacSampleSecret []byte
 
-func Token(userId uint) (string, error) {
+func Token(userId string) (string, error) {
 	InitEnv()
 	hmacSampleSecret = []byte(os.Getenv("JWT_SECRET_KEY"))
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
@@ -25,7 +25,7 @@ func Token(userId uint) (string, error) {
 	return signedToken, nil
 }
 
-func PareToken(tokenString string) (uint, error) {
+func PareToken(tokenString string) (string, error) {
 	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
 		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
 			return nil, fmt.Errorf("Unexpected signing method: %v", token.Header["alg"])
@@ -33,15 +33,18 @@ func PareToken(tokenString string) (uint, error) {
 		return hmacSampleSecret, nil
 	})
 	if err != nil {
-		return 0, err
+		return "", err
 	}
 	if !token.Valid {
-		return 0, fmt.Errorf("invalid token")
+		return "", fmt.Errorf("invalid token")
 	}
 	claims, ok := token.Claims.(jwt.MapClaims)
 	if !ok {
-		return 0, fmt.Errorf("invalid token")
+		return "", fmt.Errorf("invalid token")
 	}
-	id := uint(claims["userId"].(float64))
+	id, ok := claims["userId"].(string)
+	if !ok {
+		return "", fmt.Errorf("invalid token")
+	}
 	return id, nil
 }

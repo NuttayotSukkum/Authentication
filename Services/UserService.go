@@ -12,6 +12,7 @@ import (
 	"log"
 	"net/http"
 	"strconv"
+	"strings"
 	"time"
 )
 
@@ -37,12 +38,14 @@ func Register(c echo.Context) error {
 	}
 
 	userModel := models.User{
-		Firstname: user.Firstname,
-		Lastname:  user.Lastname,
+		Firstname: strings.ToUpper(user.Firstname),
+		Lastname:  strings.ToUpper(user.Lastname),
 		Email:     user.Email,
 		Password:  hashPass,
+		Role:      strings.ToUpper(user.Role),
 	}
 	userExist, err := Orm.FindUserByEmail(userModel.Email)
+	//log.Println("line 47")
 
 	if err != nil {
 		return c.JSON(http.StatusInternalServerError, map[string]interface{}{

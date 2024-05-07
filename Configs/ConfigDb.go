@@ -10,19 +10,30 @@ import (
 )
 
 var database *gorm.DB
-var e error
 
 func InitDb() {
+	InitEnv()
 	dsn := os.Getenv("MYSQL_DSN")
-	database, e = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if e != nil {
+	log.Println(dsn)
+	db, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
 		panic("failed to connect database")
 	}
-	database.AutoMigrate(&models.User{})
-	log.Println("Database migrated")
 
+	err = db.AutoMigrate(&models.User{})
+	if err != nil {
+		panic("failed to migrate database")
+	}
+
+	database = db
+
+	log.Println("Database migrated")
 }
+
 func GetDBInstance() *gorm.DB {
+	if database == nil {
+		log.Fatal("Database is not initialized")
+	}
 	log.Println("GetDBInstance")
 	return database
 }
