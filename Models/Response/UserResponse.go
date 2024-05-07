@@ -1,7 +1,7 @@
 package Response
 
 type User struct {
-	ID        uint
+	ID        string
 	FirstName string
 	LastName  string
 	Email     string

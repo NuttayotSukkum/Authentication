@@ -2,22 +2,26 @@ package Orm
 
 import (
 	"Authentication/Configs"
-	models "Authentication/Models"
+	. "Authentication/Models"
 	"errors"
+	"github.com/google/uuid"
 	"gorm.io/gorm"
 )
 
-func SaveUser(User *models.User) *gorm.DB {
-	Configs.InitDb()
+func SaveUser(u *User) *gorm.DB {
+	u.ID = uuid.New().String()
 	database := Configs.GetDBInstance()
-	database.Create(&User)
+	result := database.Create(&u)
+	if result.Error != nil {
+		panic(result.Error)
+	}
 	return database
 }
 
 func FindUserByEmail(email string) (bool, error) {
 	Configs.InitDb()
 	database := Configs.GetDBInstance()
-	var user models.User
+	var user User
 	if err := database.Where("email = ?", email).First(&user).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return false, nil
@@ -27,9 +31,9 @@ func FindUserByEmail(email string) (bool, error) {
 	return true, nil
 }
 
-func FindUser(email string) (*models.User, error) {
+func FindUser(email string) (*User, error) {
 	database := Configs.GetDBInstance()
-	u := models.User{}
+	u := User{}
 	if err := database.Where("email = ?", email).First(&u).Error; err != nil {
 		if errors.Is(err, gorm.ErrRecordNotFound) {
 			return nil, nil
@@ -39,20 +43,20 @@ func FindUser(email string) (*models.User, error) {
 	return &u, nil
 }
 
-func FindAllUser() (users []models.User, err error) {
+func FindAllUser() (users []User, err error) {
 	Configs.InitDb()
 	db := Configs.GetDBInstance()
-	var user []models.User
+	var user []User
 	if err := db.Find(&user).Error; err != nil {
 		return nil, err
 	}
 	return user, nil
 }
 
-func FindUserByUserId(uId uint) (*models.User, error) {
+func FindUserByUserId(uId string) (*User, error) {
 	Configs.InitDb()
 	db := Configs.GetDBInstance()
-	var user models.User
+	var user User
 	if err := db.Where("id = ?", uId).First(&user).Error; err != nil {
 		return nil, err
 	}
