@@ -5,6 +5,7 @@ import (
 	"Authentication/Configs/Middleware"
 	"Authentication/Services"
 	"github.com/labstack/echo/v4"
+	"github.com/labstack/echo/v4/middleware"
 	"os"
 )
 
@@ -15,7 +16,7 @@ type CustomEcho struct {
 func UserRouter() *echo.Echo {
 	e := echo.New()
 	Configs.InitEnv()
-
+	e.Use(middleware.CORS())
 	//g := e.Group("/user", Middleware.jWTAuthen())
 	g := e.Group("/user", Middleware.ValidateTokenMiddleware)
 	g.GET(os.Getenv("ALL_API"), Services.UserAll)
