@@ -18,17 +18,14 @@ func SaveUser(u *User) *gorm.DB {
 	return database
 }
 
-func FindUserByEmail(email string) (bool, error) {
+func FindUserByEmail(email string) bool {
 	Configs.InitDb()
 	database := Configs.GetDBInstance()
 	var user User
 	if err := database.Where("email = ?", email).First(&user).Error; err != nil {
-		if errors.Is(err, gorm.ErrRecordNotFound) {
-			return false, nil
-		}
-		return false, err
+		return false
 	}
-	return true, nil
+	return true
 }
 
 func FindUser(email string) (*User, error) {

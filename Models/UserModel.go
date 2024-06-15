@@ -6,13 +6,15 @@ import (
 )
 
 type User struct {
-	gorm.Model
 	ID        string
 	Firstname string
 	Lastname  string
 	Email     string
 	Password  string
 	Role      string
+	CreatedAt []byte
+	UpdatedAt []byte
+	DeletedAt []byte
 }
 
 func (user *User) BeforeCreate(tx *gorm.DB) (err error) {

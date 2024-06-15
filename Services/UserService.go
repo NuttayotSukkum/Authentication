@@ -36,23 +36,20 @@ func Register(c echo.Context) error {
 			"time":       time.Now().Format("2006-01-02 15:04:05"),
 			"message":    err.Error()})
 	}
-
+	now := time.Now().Format("2006-01-02 15:04:05")
 	userModel := models.User{
 		Firstname: strings.ToUpper(user.Firstname),
 		Lastname:  strings.ToUpper(user.Lastname),
 		Email:     user.Email,
 		Password:  hashPass,
 		Role:      strings.ToUpper(user.Role),
+		CreatedAt: []byte(now),
+		UpdatedAt: []byte(now),
+		DeletedAt: nil,
 	}
-	userExist, err := Orm.FindUserByEmail(userModel.Email)
+	userExist := Orm.FindUserByEmail(userModel.Email)
 	//log.Println("line 47")
 
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"httpStatus": strconv.Itoa(http.StatusInternalServerError),
-			"time":       time.Now().Format("2006-01-02 15:04:05"),
-			"message":    err.Error()})
-	}
 	if userExist == true {
 		return c.JSON(http.StatusConflict, map[string]interface{}{
 			"httpStatus": strconv.Itoa(http.StatusConflict),
@@ -86,14 +83,7 @@ func Login(c echo.Context) error {
 			"message":    err.Error()})
 	}
 	//check user exist
-	UserExist, err := Orm.FindUserByEmail(user.Email)
-
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"httpStatus": strconv.Itoa(http.StatusInternalServerError),
-			"time":       time.Now().Format("2006-01-02 15:04:05"),
-			"message":    err.Error()})
-	}
+	UserExist := Orm.FindUserByEmail(user.Email)
 
 	if UserExist != true {
 		return c.JSON(http.StatusUnauthorized, map[string]interface{}{
@@ -104,12 +94,7 @@ func Login(c echo.Context) error {
 	}
 
 	u, err := Orm.FindUser(user.Email)
-	if err != nil {
-		return c.JSON(http.StatusInternalServerError, map[string]interface{}{
-			"httpStatus": strconv.Itoa(http.StatusInternalServerError),
-			"time":       time.Now().Format("2006-01-02 15:04:05"),
-			"message":    "user not found"})
-	}
+
 	// generate Token
 	token, err := Configs.Token(u.ID)
 	if err != nil {
@@ -148,6 +133,7 @@ func UserAll(c echo.Context) error {
 			"time":       time.Now().Format("2006-01-02 15:04:05"),
 		})
 	}
+
 	return c.JSON(http.StatusOK, map[string]interface{}{
 		"httpStatus": strconv.Itoa(http.StatusOK),
 		"time":       time.Now().Format("2006-01-02 15:04:05"),
